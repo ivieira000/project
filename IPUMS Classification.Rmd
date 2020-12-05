@@ -1,0 +1,105 @@
+---
+title: "IPums- input"
+author: "Isabela Vieira"
+date: "12/4/2020"
+output: html_document
+---
+
+```{r}
+load("/Users/isabelavieira/Documents/College/Fall 2020/Econometrics/Final Project/FINAL PROJECT/acs2017_full")
+attach(acs2017)
+```
+
+```{r}
+acs2017$In_Bronx <- ifelse( (acs2017$PUMA >= 03701) & (acs2017$PUMA <= 03710), 1, 0)
+acs2017$In_Manhattan <- ifelse((acs2017$PUMA >= 03801) & (acs2017$PUMA <= 03810), 1, 0)
+acs2017$In_StatenI <- ifelse((acs2017$PUMA >= 03901) & (acs2017$PUMA <= 03903), 1, 0)
+acs2017$In_Brooklyn <- ifelse((acs2017$PUMA >= 04001) & (acs2017$PUMA <=  04018), 1, 0)
+acs2017$In_Queens <- ifelse((acs2017$PUMA >= 04101) & (acs2017$PUMA <=  04114), 1, 0)
+                              
+```
+
+```{r}
+acs2017$In_NYC <- ifelse((acs2017$PUMA >= 03701) & (acs2017$PUMA <= 04114), 1, 0)
+```
+
+```{r}
+dat_NYC <- subset(acs2017, (acs2017$In_NYC == 1)&(acs2017$AGE > 18))
+
+```
+
+
+
+```{r}
+data.use<- dat_NYC[,c("HHINCOME", "OWNERSHP", "NCHILD", "SEX", "MARST", "RACE", "HISPAN", "HCOVANY", "EDUC", "LABFORCE", "In_Brooklyn", "In_Manhattan", "In_Bronx", "In_StatenI", "In_Queens" )]
+```
+
+
+```{r}
+data.use$OWNERSHP <- as.factor(data.use$OWNERSHP)
+levels(data.use$OWNERSHP) <- c("NA","owned","rented")
+data.use[data.use$OWNERSHP == "0"] <-NA
+```
+
+```{r}
+data.use[data.use$HHINCOME == "999999"] <-NA
+data.use[data.use$HISPAN == "9"] <-NA
+data.use[data.use$EDUC == "00"] <-NA
+data.use[data.use$LABFORCE== "0"] <-NA
+
+```
+
+```{r}
+data.use$OWNERSHP <- as.factor(data.use$OWNERSHP)
+levels(data.use$OWNERSHP) <- c("NA","owned","rented")
+
+
+data.use[data.use$SEX == 1,]$SEX <- "M"
+data.use[data.use$SEX == 2,]$SEX <- "F"
+data.use$SEX <-as.factor(data.use$SEX)
+
+data.use$MARST <- as.factor(data.use$MARST)
+levels(data.use$MARST) <- c("married spouse present","married spouse absent","separated","divorced","widowed","never married")
+
+data.use$RACE <- as.factor(data.use$RACE)
+levels(data.use$RACE) <- c("White","Black","Native","Chinese","Japanese", "Other Asian","Other Race", "Bi-racial", "Multi-racial")
+
+data.use$HISPAN <- ifelse((data.use$HISPAN >= 1) & (data.use$HISPAN <= 4), 1, 0)
+data.use$HISPAN <- as.factor(data.use$HISPAN)
+levels(data.use$HISPAN) <- c("Yes","No")
+
+data.use$HCOVANY <- as.factor(data.use$HCOVANY)
+levels(data.use$HCOVANY) <- c("Not Covered","Covered")
+
+data.use$EDUC <- as.factor(data.use$EDUC)
+levels(data.use$EDUC) <- c("4th grade or less","Grades 5 to 8","Grade 9","Grade 10","Grade 11","Grade 12", "1 year of college", "2 years of college", "3 years of college", "4 years of college", "5+ years of college")
+
+data.use$LABFORCE<- as.factor(data.use$LABFORCE)
+levels(data.use$LABFORCE) <- c("Not in LF","In LF")
+
+data.use$In_Manhattan <- as.factor(data.use$In_Manhattan)
+levels(data.use$In_Manhattan) <- c("No","Yes")
+
+data.use$In_Bronx <- as.factor(data.use$In_Bronx)
+levels(data.use$In_Bronx) <- c("No","Yes")
+
+data.use$In_StatenI <- as.factor(data.use$In_StatenI)
+levels(data.use$In_StatenI) <- c("No","Yes")
+
+data.use$In_Queens <- as.factor(data.use$In_Queens)
+levels(data.use$In_Queens) <- c("No","Yes")
+
+data.use$In_Brooklyn <- as.factor(data.use$In_Brooklyn)
+levels(data.use$In_Brooklyn) <- c("No","Yes")
+```
+
+```{r}
+
+require('randomForest')
+library(randomForest)
+set.seed(54321)
+
+model1 <-randomForest(data.use$In_Bronx ~., data = data.use, proximity = TRUE)
+
+```
+
