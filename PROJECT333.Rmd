@@ -1,0 +1,182 @@
+---
+title: "Project"
+author: "Isabela Vieira"
+date: "12/9/2020"
+output: html_document
+---
+---
+title: "PUMS Classification"
+author: "Isabela Vieira"
+date: "12/6/2020"
+output: html_document
+---
+
+#Creates a veriable for boroughs
+```{r}
+acs2017_ny$borough <- factor((in_Bronx + 2*in_Manhattan + 3*in_StatenI + 4*in_Brooklyn + 5*in_Queens), levels=c(1,2,3,4,5),labels = c("Bronx","Manhattan","Staten Island","Brooklyn","Queens"))
+
+```
+
+#Re-coding some of the continuous variables (Levels resembles BRFSS levels)
+
+```{r}
+#Income variable 
+
+acs2017_ny$HHINCOME_bands <- cut(acs2017_ny$HHINCOME,breaks=c(0, 10000, 15000, 20000,25000,35000,50000,75000, 2030000), dig.lab=10)
+
+#Age Variable 
+
+acs2017_ny$age_bands <- cut(acs2017_ny$AGE,breaks=c(18,25,30,35,40,45,50,55,60,65,70,75,80,100), dig.lab=10)
+
+#Ownership 
+acs2017_ny$OWNERSHP <- as.factor(acs2017_ny$OWNERSHP)
+levels(acs2017_ny$OWNERSHP) <- c("NA","Owned","Rent")
+
+#Marital Status 
+
+acs2017_ny$MARST <- as.factor(acs2017_ny$MARST)
+levels(acs2017_ny$MARST) <- c("married","married","separated","divorced","widowed","never married")
+
+#Foodstamps
+acs2017_ny$FOODSTMP <- as.factor(acs2017_ny$FOODSTMP)
+levels(acs2017_ny$FOODSTMP) <- c("NA","no","yes")
+
+#Race
+
+acs2017_ny$RACE <- as.factor(acs2017_ny$RACE)
+levels(acs2017_ny$RACE) <- c("White","Black","American Indian/Alaskan Native", "Asian","Asian","Asian","Other","Multiracial","Multiracial")
+
+#Hispanic
+
+acs2017_ny$Hispanic <- as.factor(acs2017_ny$Hispanic)
+levels(acs2017_ny$Hispanic) <- c("No","Yes")
+
+#Health Coverage
+
+acs2017_ny$HCOVANY <- as.factor(acs2017_ny$HCOVANY)
+levels(acs2017_ny$HCOVANY) <- c("No","Yes")
+
+#In Labor force
+acs2017_ny$LABFORCE <- as.factor(acs2017_ny$LABFORCE)
+levels(acs2017_ny$LABFORCE) <- c("Not in LF","in LF", "N/A")
+
+#Education
+acs2017_ny$EDUC <- as.factor(acs2017_ny$EDUC)
+levels(acs2017_ny$EDUC) <- c("NA","4th grade or less","Grades 5 to 8","Grade 9","Grade 10","Grade 11","Grade 12", "1 year of college", "2 years of college", "3 years of college", "4 years of college", "5+ years of college")
+
+acs2017_ny$in_NYC <- as.factor(acs2017_ny$in_NYC)
+levels(acs2017_ny$in_NYC) <- c("No","Yes")
+```
+
+#Random forest for the likeability of a person in NYS being in NYC
+
+```{r}
+require("standardize")
+set.seed(654321)
+NN1 <- length(acs2017_ny$in_NYC)
+#restrict_1 <- as.logical(round(runif(NN1,min=0,max=0.70))) # use fraction as training data
+restrict_1 <- (runif(NN1) < 0.10) # use 10% as training data
+summary(restrict_1)
+dat_train1 <- subset(acs2017_ny, restrict_1)
+dat_test1 <- subset(acs2017_ny, !restrict_1)
+sobj1 <- standardize(in_NYC ~  HHINCOME_bands + OWNERSHP + NCHILD  + FOODSTMP +FAMSIZE + RACE + HISPAN + EDUC + LABFORCE + HCOVANY + age_bands + MARST, dat_train1, family = binomial)
+
+s_dat_test1 <- predict(sobj1, dat_test1)
+```
+
+```{r}
+require('randomForest')
+set.seed(54321)
+model_rf1 <- randomForest(in_NYC ~., data = sobj1$data, proximity=TRUE, na.action = na.omit)
+print(model_rf1)
+round(importance(model_rf1),2)
+varImpPlot(model_rf1)
+# look at confusion matrix for this too
+pred_model1 <- predict(model_rf1,  s_dat_test1)
+table(pred = pred_model1, true = dat_test1$in_NYC)
+```
+
+
+
+
+```{r}
+#Subset for people in NYC Only 
+
+dat_NYC <- subset(acs2017_ny, (acs2017_ny$in_NYC == "Yes"))
+
+```
+
+
+
+```{r}
+require("standardize")
+set.seed(54321)
+NN <- length(dat_NYC$borough)
+restrict_2 <- as.logical(round(runif(NN,min=0,max=0.75))) # use fraction as training data
+#restrict_1 <- (runif(NN) < 0.1) # use 10% as training data
+summary(restrict_2)
+dat_train2 <- subset(dat_NYC, restrict_2)
+dat_test2 <- subset(dat_NYC, !restrict_2)
+sobj2 <- standardize(borough ~  HHINCOME_bands + age_bands + OWNERSHP + NCHILD  + FOODSTMP +FAMSIZE + RACE + HISPAN + EDUC, dat_train2, family = binomial)
+
+s_dat_test <- predict(sobj2, dat_test2)
+```
+
+```{r}
+
+require('randomForest')
+set.seed(54321)
+model_rf2 <- randomForest(borough ~., data = sobj2$data, importance=TRUE, proximity=TRUE, na.action = na.omit)
+print(model_rf2)
+round(importance(model_rf2),2)
+varImpPlot(model_rf2)
+# look at confusion matrix for this too
+pred_model2 <- predict(model_rf2,  s_dat_test)
+table(pred = pred_model2, true = dat_test$borough)
+
+```
+
+
+
+
+
+```{r}
+require("standardize")
+set.seed(54321)
+NN3<- length(BRFSS_USE$X_METSTAT)
+
+sobj3 <- standardize(X_METSTAT ~  INCOME2 + RENTHOM1 + CHILDREN  + FOODSTMP + X_IMPRACE + X_HISPANC + EDUCA + EMPLOY1 + HLTHPLN1 + X_AGEG5YR + MARITAL, dat_train1, family = binomial)
+
+s_dat_test3 <- predict(sobj3, BRFSS_USE)
+```
+
+```{r}
+#RANDOM SUBSET BRFSS
+use.this.data <- data.table(BRFSS_USE)
+xx <-  use.this.data[sample(.N, 196585)]
+
+```
+
+
+```{r}
+require("standardize")
+set.seed(54321)
+
+sobj3 <- standardize( ~  BRFSS_USE$INCOME2 +  BRFSS_USE$RENTHOM1 +  BRFSS_USE$CHILDREN  +  BRFSS_USE$X_IMPRACE +  BRFSS_USE$X_HISPANC +  BRFSS_USE$EDUCA +  BRFSS_USE$EMPLOY1 +  BRFSS_USE$HLTHPLN1 +  BRFSS_USE$X_AGEG5YR +  BRFSS_USE$MARITAL, BRFSS_USE, family = binomial)
+
+s_dat_test <- predict(sobj3, BRFSS_USE)
+```
+
+
+
+```{r}
+require('randomForest')
+set.seed(54321)
+model_rf3 <- randomForest(in_NYC ~., data = sobj3$data, proximity=TRUE, na.action = na.omit)
+print(model_rf3)
+round(importance(model_rf3),2)
+varImpPlot(model_rf3)
+# look at confusion matrix for this too
+pred_model3 <- predict(model_rf3,  s_dat_test3)
+table(pred = pred_model3, true = dat_test3$in_NYC)
+```
