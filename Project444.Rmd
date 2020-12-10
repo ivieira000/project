@@ -1,0 +1,153 @@
+---
+title: "Project_use"
+author: "Isabela Vieira"
+date: "12/9/2020"
+output: html_document
+---
+
+#Re-coding some of the continuous variables in ACS (Levels and colnames resembles BRFSS levels)
+
+```{r}
+#Income variable 
+
+acs2017_ny$INCOME2 <- cut(acs2017_ny$HHINCOME,breaks=c(0, 10000, 15000, 20000,25000,35000,50000,75000, 2030000), dig.lab=10)
+
+#Age Variable 
+
+acs2017_ny$X_AGEG5YR <- cut(acs2017_ny$AGE,breaks=c(18,25,30,35,40,45,50,55,60,65,70,75,80,100), dig.lab=10)
+
+#Ownership 
+acs2017_ny$RENTHOM1 <- as.factor(acs2017_ny$OWNERSHP)
+levels(acs2017_ny$OWNERSHP) <- c("NA","Owned","Rent")
+
+#Marital Status 
+
+acs2017_ny$MARST <- as.factor(acs2017_ny$MARST) #Have to change name in BRFSS
+levels(acs2017_ny$MARST) <- c("married","married","separated","divorced","widowed","never married")
+
+#Foodstamps
+#acs2017_ny$FOODSTMP <- as.factor(acs2017_ny$FOODSTMP)
+#levels(acs2017_ny$FOODSTMP) <- c("NA","no","yes")
+
+#Race
+
+acs2017_ny$RACE <- as.factor(acs2017_ny$RACE) #Have to change name in BRFSS
+levels(acs2017_ny$RACE) <- c("White","Black","American Indian/Alaskan Native", "Asian","Asian","Asian","Other","Other","Other")
+
+#Hispanic
+
+acs2017_ny$X_HISPANC <- as.factor(acs2017_ny$Hispanic)
+levels(acs2017_ny$Hispanic) <- c("No","Yes")
+
+#Health Coverage
+
+acs2017_ny$HLTHPLN1 <- as.factor(acs2017_ny$HCOVANY)
+levels(acs2017_ny$HCOVANY) <- c("No","Yes")
+
+#In Labor force
+acs2017_ny$EMPLOY1 <- as.factor(acs2017_ny$LABFORCE)
+levels(acs2017_ny$LABFORCE) <- c("Not in LF","in LF", "N/A")
+
+#Education
+acs2017_ny$EDUCA <- as.factor(acs2017_ny$EDUC)
+levels(acs2017_ny$EDUC) <- c("NA","Grades 1 through 8","Grades 1 through 8","Grades 9 through 11","Grades 9 through 11","Grades 9 through 11","Grade 12 or GED", "College 1 year to 3 years", "College 1 year to 3 years", "College 1 year to 3 years", "College 4 years or more", "College 4 years or more")
+
+acs2017_ny$in_NYC <- as.factor(acs2017_ny$in_NYC)
+levels(acs2017_ny$in_NYC) <- c("No","Yes")
+```
+
+
+#Recoding for BRFSS
+```{r}
+#INCOME
+is.na(BRFSS_USE$INCOME2) <- which(BRFSS_USE$INCOME2 == 99)
+is.na(BRFSS_USE$INCOME2) <- which(BRFSS_USE$INCOME2 == 77)
+BRFSS_USE$INCOME2 <- as.factor(BRFSS_USE$INCOME2)
+levels(BRFSS_USE$INCOME2) <- c("0", "10000", "15000","20000","25000","35000","50000","75000", "2030000")
+
+#Age Variable 
+
+is.na(BRFSS_USE$X_AGEG5YR) <- which(BRFSS_USE$X_AGEG5YR == 14)
+BRFSS_USE$X_AGEG5YR <- as.factor(BRFSS_USE$X_AGEG5YR)
+levels(BRFSS_USE$X_AGEG5YR) <- c("18","25","30","35","40","45","50","55","60","65","70","75","80","100")
+
+
+#Ownership 
+is.na(BRFSS_USE$RENTHOM1) <- which(BRFSS_USE$RENTHOM1 == 7)
+is.na(BRFSS_USE$RENTHOM1) <- which(BRFSS_USE$RENTHOM1 == 9)
+BRFSS_USE$RENTHOM1 <- as.factor(BRFSS_USE$RENTHOM1)
+levels(BRFSS_USE$RENTHOM1) <- c("NA","Owned","Rent")
+
+#Marital Status 
+
+BRFSS_USE$MARST <- as.factor(BRFSS_USE$MARITAL) 
+levels(BRFSS_USE$MARST) <- c("married","divorced","widowed","separated","never married","NA","NA")
+
+#Foodstamps
+#acs2017_ny$FOODSTMP <- as.factor(acs2017_ny$FOODSTMP)
+#levels(acs2017_ny$FOODSTMP) <- c("NA","no","yes")
+
+#Race
+
+BRFSS_USE$RACE <- as.factor(BRFSS_USE$X_IMPRACE) #Have to change name in BRFSS
+levels(BRFSS_USE$X_IMPRACE) <- c("White","Black", "Asian","American Indian/Alaskan Native", "Other","Other")
+
+#Hispanic
+is.na(BRFSS_USE$X_HISPANC) <- which(BRFSS_USE$X_HISPANC == 9)
+BRFSS_USE$X_HISPANC <- as.factor(BRFSS_USE$X_HISPANC)
+levels(BRFSS_USE$X_HISPANC) <- c("No","Yes")
+
+#Health Coverage
+
+acs2017_ny$HLTHPLN1 <- as.factor(acs2017_ny$HCOVANY)
+levels(acs2017_ny$HCOVANY) <- c("No","Yes")
+
+#In Labor force
+BRFSS_USE$EMPLOY1 <- as.factor(BRFSS_USE$EMPLOY1)
+levels(BRFSS_USE$EMPLOY1) <- c("in LF","in LF","Not in LF","in LF", "Not in LF", "Not in LF","Not in LF","Not in LF","N/A")
+
+#Education
+is.na(BRFSS_USE$EDUCA) <- which(BRFSS_USE$EDUCA == 9)
+BRFSS_USE$EDUCA <- as.factor(BRFSS_USE$EDUCA)
+levels(BRFSS_USE$EDUCA) <- c("NA","Grades 1 through 8","Grades 9 through 11","Grade 12 or GED", "College 1 year to 3 years", "College 4 years or more")
+
+
+```
+
+#Random forest for the likeability of a person in NYS being in NYC
+
+```{r}
+require("standardize")
+set.seed(654321)
+NN1 <- length(acs2017_ny$in_NYC)
+#restrict_1 <- as.logical(round(runif(NN1,min=0,max=0.70))) # use fraction as training data
+restrict_1 <- (runif(NN1) < 0.10) # use 10% as training data
+summary(restrict_1)
+dat_train1 <- subset(acs2017_ny, restrict_1)
+dat_test1 <- subset(acs2017_ny, !restrict_1)
+sobj1 <- standardize(in_NYC ~  INCOME2 + RENTHOM1 + RACE + X_HISPANC + EDUCA + EMPLOY1  + HLTHPLN1 + X_AGEG5YR + MARST, dat_train1, family = binomial)
+
+s_dat_test1 <- predict(sobj1, dat_test1)
+```
+
+```{r}
+require('randomForest')
+set.seed(54321)
+model_rf1 <- randomForest(in_NYC ~., data = sobj1$data, proximity=TRUE, na.action = na.omit)
+print(model_rf1)
+round(importance(model_rf1),2)
+varImpPlot(model_rf1)
+# look at confusion matrix for this too
+pred_model1 <- predict(model_rf1,  s_dat_test1)
+
+
+
+```
+
+```{r}
+predict(model_rf1, newdata = BRFSS_USE)
+```
+
+
+
+
