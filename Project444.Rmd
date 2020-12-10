@@ -10,20 +10,24 @@ output: html_document
 ```{r}
 #Income variable 
 
-acs2017_ny$INCOME2 <- cut(acs2017_ny$HHINCOME,breaks=c(0, 10000, 15000, 20000,25000,35000,50000,75000, 2030000), dig.lab=10)
+acs2017_ny$INCOME2 <- cut(acs2017_ny$HHINCOME,breaks=c(0, 10000, 15000, 20000,25000,35000,50000,75000, 230000), dig.lab=10)
+acs2017_ny$INCOME2 <- as.factor(acs2017_ny$INCOME2)
+levels(acs2017_ny$INCOME2) <- c("0", "10000", "15000","20000","25000","35000","50000","75000", "230000")
 
 #Age Variable 
 
 acs2017_ny$X_AGEG5YR <- cut(acs2017_ny$AGE,breaks=c(18,25,30,35,40,45,50,55,60,65,70,75,80,100), dig.lab=10)
+acs2017_ny$X_AGEG5YR <- as.factor(acs2017_ny$X_AGEG5YR)
+levels(acs2017_ny$X_AGEG5YR) <-c("18","25","30","35","40","45","50","55","60","65","70","75","80","100")
 
 #Ownership 
 acs2017_ny$RENTHOM1 <- as.factor(acs2017_ny$OWNERSHP)
-levels(acs2017_ny$OWNERSHP) <- c("NA","Owned","Rent")
+levels(acs2017_ny$RENTHOM1) <- c("NA","Owned","Rent")
 
 #Marital Status 
 
 acs2017_ny$MARST <- as.factor(acs2017_ny$MARST) #Have to change name in BRFSS
-levels(acs2017_ny$MARST) <- c("married","married","separated","divorced","widowed","never married")
+levels(acs2017_ny$MARST) <- c("married","NA","separated","divorced","widowed","never married")
 
 #Foodstamps
 #acs2017_ny$FOODSTMP <- as.factor(acs2017_ny$FOODSTMP)
@@ -37,20 +41,20 @@ levels(acs2017_ny$RACE) <- c("White","Black","American Indian/Alaskan Native", "
 #Hispanic
 
 acs2017_ny$X_HISPANC <- as.factor(acs2017_ny$Hispanic)
-levels(acs2017_ny$Hispanic) <- c("No","Yes")
+levels(acs2017_ny$X_HISPANC) <- c("No","Yes")
 
 #Health Coverage
 
 acs2017_ny$HLTHPLN1 <- as.factor(acs2017_ny$HCOVANY)
-levels(acs2017_ny$HCOVANY) <- c("No","Yes")
+levels(acs2017_ny$HLTHPLN1) <- c("No","Yes", "NA")
 
 #In Labor force
 acs2017_ny$EMPLOY1 <- as.factor(acs2017_ny$LABFORCE)
-levels(acs2017_ny$LABFORCE) <- c("Not in LF","in LF", "N/A")
+levels(acs2017_ny$EMPLOY1) <- c("Not in LF","in LF", "N/A")
 
 #Education
 acs2017_ny$EDUCA <- as.factor(acs2017_ny$EDUC)
-levels(acs2017_ny$EDUC) <- c("NA","Grades 1 through 8","Grades 1 through 8","Grades 9 through 11","Grades 9 through 11","Grades 9 through 11","Grade 12 or GED", "College 1 year to 3 years", "College 1 year to 3 years", "College 1 year to 3 years", "College 4 years or more", "College 4 years or more")
+levels(acs2017_ny$EDUCA) <- c("NA","Grades 1 through 8","Grades 1 through 8","Grades 9 through 11","Grades 9 through 11","Grades 9 through 11","Grade 12 or GED", "College 1 year to 3 years", "College 1 year to 3 years", "College 1 year to 3 years", "College 4 years or more", "College 4 years or more")
 
 acs2017_ny$in_NYC <- as.factor(acs2017_ny$in_NYC)
 levels(acs2017_ny$in_NYC) <- c("No","Yes")
@@ -63,7 +67,7 @@ levels(acs2017_ny$in_NYC) <- c("No","Yes")
 is.na(BRFSS_USE$INCOME2) <- which(BRFSS_USE$INCOME2 == 99)
 is.na(BRFSS_USE$INCOME2) <- which(BRFSS_USE$INCOME2 == 77)
 BRFSS_USE$INCOME2 <- as.factor(BRFSS_USE$INCOME2)
-levels(BRFSS_USE$INCOME2) <- c("0", "10000", "15000","20000","25000","35000","50000","75000", "2030000")
+levels(BRFSS_USE$INCOME2) <- c("0", "10000", "15000","20000","25000","35000","50000","75000", "230000")
 
 #Age Variable 
 
@@ -90,7 +94,7 @@ levels(BRFSS_USE$MARST) <- c("married","divorced","widowed","separated","never m
 #Race
 
 BRFSS_USE$RACE <- as.factor(BRFSS_USE$X_IMPRACE) #Have to change name in BRFSS
-levels(BRFSS_USE$X_IMPRACE) <- c("White","Black", "Asian","American Indian/Alaskan Native", "Other","Other")
+levels(BRFSS_USE$RACE) <- c("White","Black", "Asian","American Indian/Alaskan Native", "Other","Other")
 
 #Hispanic
 is.na(BRFSS_USE$X_HISPANC) <- which(BRFSS_USE$X_HISPANC == 9)
@@ -99,8 +103,10 @@ levels(BRFSS_USE$X_HISPANC) <- c("No","Yes")
 
 #Health Coverage
 
-acs2017_ny$HLTHPLN1 <- as.factor(acs2017_ny$HCOVANY)
-levels(acs2017_ny$HCOVANY) <- c("No","Yes")
+is.na(BRFSS_USE$HLTHPLN1) <- which(BRFSS_USE$HLTHPLN1 == 9)
+is.na(BRFSS_USE$HLTHPLN1) <- which(BRFSS_USE$HLTHPLN1 == 7)
+BRFSS_USE$HLTHPLN1 <- as.factor(BRFSS_USE$HLTHPLN1)
+levels(BRFSS_USE$HLTHPLN1) <- c("No","Yes", "NA", "NA")
 
 #In Labor force
 BRFSS_USE$EMPLOY1 <- as.factor(BRFSS_USE$EMPLOY1)
@@ -124,7 +130,7 @@ NN1 <- length(acs2017_ny$in_NYC)
 restrict_1 <- (runif(NN1) < 0.10) # use 10% as training data
 summary(restrict_1)
 dat_train1 <- subset(acs2017_ny, restrict_1)
-dat_test1 <- subset(acs2017_ny, !restrict_1)
+dat_test1 <- subset(acs2017_ny, restrict_1)
 sobj1 <- standardize(in_NYC ~  INCOME2 + RENTHOM1 + RACE + X_HISPANC + EDUCA + EMPLOY1  + HLTHPLN1 + X_AGEG5YR + MARST, dat_train1, family = binomial)
 
 s_dat_test1 <- predict(sobj1, dat_test1)
@@ -144,8 +150,19 @@ pred_model1 <- predict(model_rf1,  s_dat_test1)
 
 ```
 
+Subset for people in NYS only *BRFSS 
 ```{r}
-predict(model_rf1, newdata = BRFSS_USE)
+BRFSS.SUBSET.RULE <- (BRFSS_USE$X_STATE == 36) 
+BRFSS.SUBSET <- subset(BRFSS_USE,BRFSS.SUBSET.RULE) 
+
+#attach()
+```
+
+
+
+```{r}
+s_dat_test2 <- predict(sobj1, BRFSS.SUBSET)
+BRFSS.SUBSET$in_NYC <- predict(model_rf1, s_dat_test2)
 ```
 
 
