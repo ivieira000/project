@@ -8,26 +8,35 @@ output: html_document
 #Re-coding some of the continuous variables in ACS (Levels and colnames resembles BRFSS levels)
 
 ```{r}
-#Income variable 
+#Income variable
+
+library(forcats)
 
 acs2017_ny$INCOME2 <- cut(acs2017_ny$HHINCOME,breaks=c(0, 10000, 15000, 20000,25000,35000,50000,75000, 230000), dig.lab=10)
 acs2017_ny$INCOME2 <- as.factor(acs2017_ny$INCOME2)
+na.exclude(acs2017_ny$INCOME2)
 levels(acs2017_ny$INCOME2) <- c("0", "10000", "15000","20000","25000","35000","50000","75000", "230000")
 
 #Age Variable 
 
 acs2017_ny$X_AGEG5YR <- cut(acs2017_ny$AGE,breaks=c(18,25,30,35,40,45,50,55,60,65,70,75,80,100), dig.lab=10)
 acs2017_ny$X_AGEG5YR <- as.factor(acs2017_ny$X_AGEG5YR)
+na.exclude(acs2017_ny$X_AGEG5YR)
 levels(acs2017_ny$X_AGEG5YR) <-c("18","25","30","35","40","45","50","55","60","65","70","75","80","100")
 
 #Ownership 
+
+is.na(acs2017_ny$OWNERSHP) <- which(acs2017_ny$OWNERSHP == 0)
+na.exclude(acs2017_ny$OWNERSHP)
 acs2017_ny$RENTHOM1 <- as.factor(acs2017_ny$OWNERSHP)
-levels(acs2017_ny$RENTHOM1) <- c("NA","Owned","Rent")
+levels(acs2017_ny$RENTHOM1) <- c("Owned","Rent")
 
 #Marital Status 
 
 acs2017_ny$MARST <- as.factor(acs2017_ny$MARST) #Have to change name in BRFSS
-levels(acs2017_ny$MARST) <- c("married","NA","separated","divorced","widowed","never married")
+levels(acs2017_ny$MARST) <- c("married","married2","separated","divorced","widowed","never.married")
+acs2017_ny$MARST <- fct_collapse(acs2017_ny$MARST, married = c("married","married2"))
+
 
 #Foodstamps
 #acs2017_ny$FOODSTMP <- as.factor(acs2017_ny$FOODSTMP)
@@ -36,7 +45,10 @@ levels(acs2017_ny$MARST) <- c("married","NA","separated","divorced","widowed","n
 #Race
 
 acs2017_ny$RACE <- as.factor(acs2017_ny$RACE) #Have to change name in BRFSS
-levels(acs2017_ny$RACE) <- c("White","Black","American Indian/Alaskan Native", "Asian","Asian","Asian","Other","Other","Other")
+levels(acs2017_ny$RACE) <- c("White","Black","American Indian/Alaskan Native", "Chinese","Japanese","Asian other","Other Race","Two major races","Three or more major races")
+acs2017_ny$RACE <- fct_collapse(acs2017_ny$RACE, Asian = c("Chinese","Japanese","Asian other"))
+acs2017_ny$RACE <- fct_collapse(acs2017_ny$RACE, Multiracial = c("Two major races","Three or more major races"))
+
 
 #Hispanic
 
@@ -46,15 +58,27 @@ levels(acs2017_ny$X_HISPANC) <- c("No","Yes")
 #Health Coverage
 
 acs2017_ny$HLTHPLN1 <- as.factor(acs2017_ny$HCOVANY)
-levels(acs2017_ny$HLTHPLN1) <- c("No","Yes", "NA")
+levels(acs2017_ny$HLTHPLN1) <- c("No","Yes")
 
 #In Labor force
-acs2017_ny$EMPLOY1 <- as.factor(acs2017_ny$LABFORCE)
-levels(acs2017_ny$EMPLOY1) <- c("Not in LF","in LF", "N/A")
+
+is.na(acs2017_ny$LABFORCE) <- which(acs2017_ny$LABFORCE == 0)
+na.exclude(acs2017_ny$LABFORCE)
+acs2017_ny$LABFORCE <- as.factor(acs2017_ny$LABFORCE)
+levels(acs2017_ny$LABFORCE) <- c("Not.in.LF","in.LF")
 
 #Education
+
+acs2017_ny$EDUC <- as.numeric(acs2017_ny$EDUC)
+is.na(acs2017_ny$EDUC) <- which(acs2017_ny$EDUC == 00)
+na.exclude(acs2017_ny$EDUC)
 acs2017_ny$EDUCA <- as.factor(acs2017_ny$EDUC)
-levels(acs2017_ny$EDUCA) <- c("NA","Grades 1 through 8","Grades 1 through 8","Grades 9 through 11","Grades 9 through 11","Grades 9 through 11","Grade 12 or GED", "College 1 year to 3 years", "College 1 year to 3 years", "College 1 year to 3 years", "College 4 years or more", "College 4 years or more")
+levels(acs2017_ny$EDUCA) <- c("n to 4","5 to 8","9","10","11","12", "College 1 year", "College 2 ", "College 3", "College 4 ", "College 5")
+acs2017_ny$EDUCA <- fct_collapse(acs2017_ny$EDUCA, Elementary = c("n to 4","5 to 8"))
+acs2017_ny$EDUCA <- fct_collapse(acs2017_ny$EDUCA, SomeHS = c("9","10","11"))
+acs2017_ny$EDUCA <- fct_collapse(acs2017_ny$EDUCA, HS = c("12"))
+acs2017_ny$EDUCA <- fct_collapse(acs2017_ny$EDUCA, SomeC = c("College 1 year", "College 2 ", "College 3"))
+acs2017_ny$EDUCA <- fct_collapse(acs2017_ny$EDUCA, College = c("College 4 ", "College 5"))
 
 acs2017_ny$in_NYC <- as.factor(acs2017_ny$in_NYC)
 levels(acs2017_ny$in_NYC) <- c("No","Yes")
@@ -66,12 +90,14 @@ levels(acs2017_ny$in_NYC) <- c("No","Yes")
 #INCOME
 is.na(BRFSS_USE$INCOME2) <- which(BRFSS_USE$INCOME2 == 99)
 is.na(BRFSS_USE$INCOME2) <- which(BRFSS_USE$INCOME2 == 77)
+na.exclude(BRFSS_USE$INCOME2)
 BRFSS_USE$INCOME2 <- as.factor(BRFSS_USE$INCOME2)
 levels(BRFSS_USE$INCOME2) <- c("0", "10000", "15000","20000","25000","35000","50000","75000", "230000")
 
 #Age Variable 
 
 is.na(BRFSS_USE$X_AGEG5YR) <- which(BRFSS_USE$X_AGEG5YR == 14)
+na.exclude(BRFSS_USE$X_AGEG5YR)
 BRFSS_USE$X_AGEG5YR <- as.factor(BRFSS_USE$X_AGEG5YR)
 levels(BRFSS_USE$X_AGEG5YR) <- c("18","25","30","35","40","45","50","55","60","65","70","75","80","100")
 
@@ -79,13 +105,18 @@ levels(BRFSS_USE$X_AGEG5YR) <- c("18","25","30","35","40","45","50","55","60","6
 #Ownership 
 is.na(BRFSS_USE$RENTHOM1) <- which(BRFSS_USE$RENTHOM1 == 7)
 is.na(BRFSS_USE$RENTHOM1) <- which(BRFSS_USE$RENTHOM1 == 9)
+is.na(BRFSS_USE$RENTHOM1) <- which(BRFSS_USE$RENTHOM1 == 3)
+na.exclude(BRFSS_USE$RENTHOM1)
 BRFSS_USE$RENTHOM1 <- as.factor(BRFSS_USE$RENTHOM1)
-levels(BRFSS_USE$RENTHOM1) <- c("NA","Owned","Rent")
+levels(BRFSS_USE$RENTHOM1) <- c("Owned","Rent")
 
 #Marital Status 
 
+is.na(BRFSS_USE$MARITAL) <- which(BRFSS_USE$MARITAL == 9)
+na.exclude(BRFSS_USE$MARITAL)
 BRFSS_USE$MARST <- as.factor(BRFSS_USE$MARITAL) 
-levels(BRFSS_USE$MARST) <- c("married","divorced","widowed","separated","never married","NA","NA")
+levels(BRFSS_USE$MARST) <- c("married","divorced","widowed","separated","never married","living tgt")
+BRFSS_USE$MARST <- fct_collapse(BRFSS_USE$MARST, never.married = c("living tgt","never married"))
 
 #Foodstamps
 #acs2017_ny$FOODSTMP <- as.factor(acs2017_ny$FOODSTMP)
@@ -93,11 +124,16 @@ levels(BRFSS_USE$MARST) <- c("married","divorced","widowed","separated","never m
 
 #Race
 
+is.na(BRFSS_USE$X_IMPRACE) <- which(BRFSS_USE$X_IMPRACE == 77)
+is.na(BRFSS_USE$X_IMPRACE) <- which(BRFSS_USE$X_IMPRACE == 99)
+na.exclude(BRFSS_USE$X_IMPRACE)
 BRFSS_USE$RACE <- as.factor(BRFSS_USE$X_IMPRACE) #Have to change name in BRFSS
-levels(BRFSS_USE$RACE) <- c("White","Black", "Asian","American Indian/Alaskan Native", "Other","Other")
+levels(BRFSS_USE$RACE) <- c("White","Black", "American Indian/Alaskan Native", "Asian", "Pacific","Other Race","Multiracial")
+BRFSS_USE$RACE <- fct_collapse(BRFSS_USE$RACE, Asian = c("Asian", "Pacific"))
 
 #Hispanic
 is.na(BRFSS_USE$X_HISPANC) <- which(BRFSS_USE$X_HISPANC == 9)
+na.exclude(BRFSS_USE$X_HISPANC)
 BRFSS_USE$X_HISPANC <- as.factor(BRFSS_USE$X_HISPANC)
 levels(BRFSS_USE$X_HISPANC) <- c("No","Yes")
 
@@ -105,18 +141,30 @@ levels(BRFSS_USE$X_HISPANC) <- c("No","Yes")
 
 is.na(BRFSS_USE$HLTHPLN1) <- which(BRFSS_USE$HLTHPLN1 == 9)
 is.na(BRFSS_USE$HLTHPLN1) <- which(BRFSS_USE$HLTHPLN1 == 7)
+na.exclude(BRFSS_USE$HLTHPLN1)
 BRFSS_USE$HLTHPLN1 <- as.factor(BRFSS_USE$HLTHPLN1)
-levels(BRFSS_USE$HLTHPLN1) <- c("No","Yes", "NA", "NA")
+levels(BRFSS_USE$HLTHPLN1) <- c("No","Yes")
 
 #In Labor force
-BRFSS_USE$EMPLOY1 <- as.factor(BRFSS_USE$EMPLOY1)
-levels(BRFSS_USE$EMPLOY1) <- c("in LF","in LF","Not in LF","in LF", "Not in LF", "Not in LF","Not in LF","Not in LF","N/A")
+
+is.na(BRFSS_USE$EMPLOY1) <- which(BRFSS_USE$EMPLOY1 == 9)
+na.exclude(BRFSS_USE$EMPLOY1)
+BRFSS_USE$LABFORCE <- as.factor(BRFSS_USE$EMPLOY1)
+levels(BRFSS_USE$LABFORCE) <- c("Employed wage","self-employed","out of work","out of work 1<", "homemaker", "student","retired","disabled")
+BRFSS_USE$LABFORCE <- fct_collapse(BRFSS_USE$LABFORCE, Not.in.LF = c("out of work","homemaker","student","retired","disabled"))
+BRFSS_USE$LABFORCE <- fct_collapse(BRFSS_USE$LABFORCE, in.LF = c("Employed wage","self-employed","out of work 1<"))
+
 
 #Education
 is.na(BRFSS_USE$EDUCA) <- which(BRFSS_USE$EDUCA == 9)
+na.exclude(BRFSS_USE$EDUCA)
 BRFSS_USE$EDUCA <- as.factor(BRFSS_USE$EDUCA)
-levels(BRFSS_USE$EDUCA) <- c("NA","Grades 1 through 8","Grades 9 through 11","Grade 12 or GED", "College 1 year to 3 years", "College 4 years or more")
-
+levels(BRFSS_USE$EDUCA) <- c("kinder","Grades 1 through 8","Grades 9 through 11","Grade 12 or GED", "College 1 year to 3 years", "College 4 years or more")
+BRFSS_USE$EDUCA <- fct_collapse(BRFSS_USE$EDUCA, Elementary = c("kinder","Grades 1 through 8"))
+BRFSS_USE$EDUCA <- fct_collapse(BRFSS_USE$EDUCA, SomeHS = c("Grades 9 through 11"))
+BRFSS_USE$EDUCA <- fct_collapse(BRFSS_USE$EDUCA, HS = c("Grade 12 or GED"))
+BRFSS_USE$EDUCA <- fct_collapse(BRFSS_USE$EDUCA, SomeC = c("College 1 year to 3 years"))
+BRFSS_USE$EDUCA <- fct_collapse(BRFSS_USE$EDUCA, College = c("College 4 years or more"))
 
 ```
 
@@ -127,11 +175,11 @@ require("standardize")
 set.seed(654321)
 NN1 <- length(acs2017_ny$in_NYC)
 #restrict_1 <- as.logical(round(runif(NN1,min=0,max=0.70))) # use fraction as training data
-restrict_1 <- (runif(NN1) < 0.10) # use 10% as training data
+restrict_1 <- (runif(NN1) < 0.20) # use 10% as training data
 summary(restrict_1)
 dat_train1 <- subset(acs2017_ny, restrict_1)
-dat_test1 <- subset(acs2017_ny, restrict_1)
-sobj1 <- standardize(in_NYC ~  INCOME2 + RENTHOM1 + RACE + X_HISPANC + EDUCA + EMPLOY1  + HLTHPLN1 + X_AGEG5YR + MARST, dat_train1, family = binomial)
+dat_test1 <- subset(acs2017_ny, !restrict_1)
+sobj1 <- standardize(in_NYC ~  INCOME2 + RENTHOM1 + RACE + X_HISPANC + EDUCA + LABFORCE + HLTHPLN1 + X_AGEG5YR + MARST, dat_train1, family = binomial, na.action = na.pass)
 
 s_dat_test1 <- predict(sobj1, dat_test1)
 ```
@@ -139,23 +187,23 @@ s_dat_test1 <- predict(sobj1, dat_test1)
 ```{r}
 require('randomForest')
 set.seed(54321)
-model_rf1 <- randomForest(in_NYC ~., data = sobj1$data, proximity=TRUE, na.action = na.omit)
+model_rf1 <- randomForest(in_NYC ~., data = sobj1$data, na.action = na.exclude)
 print(model_rf1)
 round(importance(model_rf1),2)
 varImpPlot(model_rf1)
 # look at confusion matrix for this too
-pred_model1 <- predict(model_rf1,  s_dat_test1)
+pred_model1 <- predict(model_rf1, s_dat_test1)
 
 
 
 ```
-
+#Should we also restric metropolitan area at this point? #here
 Subset for people in NYS only *BRFSS 
 ```{r}
-BRFSS.SUBSET.RULE <- (BRFSS_USE$X_STATE == 36) 
+BRFSS.SUBSET.RULE <- (BRFSS_USE$X_STATE == 36) & (BRFSS_USE$X_METSTAT == 1)
 BRFSS.SUBSET <- subset(BRFSS_USE,BRFSS.SUBSET.RULE) 
 
-#attach()
+#attach(BRFSS.SUBSET)
 ```
 
 
@@ -165,6 +213,58 @@ s_dat_test2 <- predict(sobj1, BRFSS.SUBSET)
 BRFSS.SUBSET$in_NYC <- predict(model_rf1, s_dat_test2)
 ```
 
+Now, we do borough predictions 
+
+```{r}
+acs2017_ny$borough <- factor((in_Bronx + 2*in_Manhattan + 3*in_StatenI + 4*in_Brooklyn + 5*in_Queens), levels=c(1,2,3,4,5),labels = c("Bronx","Manhattan","Staten Island","Brooklyn","Queens"))
+
+```
+
+```{r}
+require("standardize")
+set.seed(54321)
+NN <- length(acs2017_ny$borough)
+restrict_2 <- as.logical(round(runif(NN,min=0,max=0.75))) # use fraction as training data
+#restrict_1 <- (runif(NN) < 0.1) # use 10% as training data
+summary(restrict_2)
+dat_train2 <- subset(acs2017_ny, restrict_2)
+dat_test2 <- subset(acs2017_ny, !restrict_2)
+sobj2 <- standardize(borough ~ INCOME2 + RENTHOM1 + RACE + X_HISPANC + EDUCA + EMPLOY1  + HLTHPLN1 + X_AGEG5YR + MARST, dat_train2, family = binomial)
+
+s_dat_test3 <- predict(sobj2, dat_test2)
+```
+
+```{r}
+
+require('randomForest')
+set.seed(54321)
+model_rf2 <- randomForest(borough ~., data = sobj2$data, importance=TRUE, proximity=TRUE, na.action = na.omit)
+print(model_rf2)
+round(importance(model_rf2),2)
+varImpPlot(model_rf2)
+# look at confusion matrix for this too
+pred_model2 <- predict(model_rf2,  s_dat_test3)
+table(pred = pred_model2, true = dat_test2$borough)
+
+```
+
+
+```{r}
+BRFSS.SUBSET.RULE2 <- (BRFSS.SUBSET$in_NYC == "Yes")
+BRFSS.SUBSET2 <- subset(BRFSS.SUBSET,BRFSS.SUBSET.RULE2) 
+```
+
+
+```{r}
+s_dat_test3 <- predict(sobj2, BRFSS.SUBSET2)
+BRFSS.SUBSET2$borough <- predict(model_rf2, s_dat_test3)
+```
+
+#To run or not to run?
+```{r}
+library(mice)
+BRFSS.SUBSET = mice(BRFSS.SUBSET, seed = 12345)
+```
 
 
 
