@@ -2,27 +2,58 @@
 title: "Project_use"
 author: "Isabela Vieira"
 date: "12/9/2020"
-output: html_document
+output:
+  word_document: default
+  pdf_document: default
+  'word_document: default': default
 ---
 
 #Re-coding some of the continuous variables in ACS (Levels and colnames resembles BRFSS levels)
 
+
+
+
 ```{r}
+load("~/Documents/College/Fall 2020/Econometrics/acs2017_ny_data.RData")
+BRFSS_USE <- readRDS("~/Documents/College/Fall 2020/Econometrics/Final Project/FINAL PROJECT/BRFSS_USE.rds")
+attach(acs2017_ny)
+attach(BRFSS_USE)
+
+```
+
+```{r, echo=FALSE}
 #Income variable
 
 library(forcats)
 
-acs2017_ny$INCOME2 <- cut(acs2017_ny$HHINCOME,breaks=c(0, 10000, 15000, 20000,25000,35000,50000,75000, 230000), dig.lab=10)
-acs2017_ny$INCOME2 <- as.factor(acs2017_ny$INCOME2)
-na.exclude(acs2017_ny$INCOME2)
-levels(acs2017_ny$INCOME2) <- c("0", "10000", "15000","20000","25000","35000","50000","75000", "230000")
+acs2017_ny$INCOME2[acs2017_ny$HHINCOME > 0 & acs2017_ny$HHINCOME < 10000] = "10000"
+acs2017_ny$INCOME2[acs2017_ny$HHINCOME >= 10000 & acs2017_ny$HHINCOME < 15000] = "15000"
+acs2017_ny$INCOME2[acs2017_ny$HHINCOME >= 15000 & acs2017_ny$HHINCOME < 20000] = "20000"
+acs2017_ny$INCOME2[acs2017_ny$HHINCOME >= 20000 & acs2017_ny$HHINCOME < 25000] = "25000"
+acs2017_ny$INCOME2[acs2017_ny$HHINCOME >= 25000 & acs2017_ny$HHINCOME < 35000] = "35000"
+acs2017_ny$INCOME2[acs2017_ny$HHINCOME >= 35000 & acs2017_ny$HHINCOME < 50000] = "50000"
+acs2017_ny$INCOME2[acs2017_ny$HHINCOME >= 50000 & acs2017_ny$HHINCOME < 75000] = "75000"
+acs2017_ny$INCOME2[acs2017_ny$HHINCOME >= 75000] = "2030000"
 
-#Age Variable 
+acs2017_ny$INCOME2 = factor(acs2017_ny$INCOME2,levels=c("10000", "15000", "20000","25000","35000","50000","75000","2030000"))
 
-acs2017_ny$X_AGEG5YR <- cut(acs2017_ny$AGE,breaks=c(18,25,30,35,40,45,50,55,60,65,70,75,80,100), dig.lab=10)
-acs2017_ny$X_AGEG5YR <- as.factor(acs2017_ny$X_AGEG5YR)
-na.exclude(acs2017_ny$X_AGEG5YR)
-levels(acs2017_ny$X_AGEG5YR) <-c("18","25","30","35","40","45","50","55","60","65","70","75","80","100")
+#Age 
+acs2017_ny$AGE[acs2017_ny$AGE >= 18 & acs2017_ny$AGE <= 24] = "18"
+acs2017_ny$AGE[acs2017_ny$AGE >= 25 & acs2017_ny$AGE <= 29] = "25"
+acs2017_ny$AGE[acs2017_ny$AGE >= 30 & acs2017_ny$AGE <= 34] = "30"
+acs2017_ny$AGE[acs2017_ny$AGE >= 35 & acs2017_ny$AGE <= 39] = "35"
+acs2017_ny$AGE[acs2017_ny$AGE >= 40 & acs2017_ny$AGE <= 44] = "40"
+acs2017_ny$AGE[acs2017_ny$AGE >= 45 & acs2017_ny$AGE <= 49] = "45"
+acs2017_ny$AGE[acs2017_ny$AGE >= 50 & acs2017_ny$AGE <= 54] = "50"
+acs2017_ny$AGE[acs2017_ny$AGE >= 55 & acs2017_ny$AGE <= 59] = "55"
+acs2017_ny$AGE[acs2017_ny$AGE >= 60 & acs2017_ny$AGE <= 64] = "60"
+acs2017_ny$AGE[acs2017_ny$AGE >= 65 & acs2017_ny$AGE <= 69] = "65"
+acs2017_ny$AGE[acs2017_ny$AGE >= 70 & acs2017_ny$AGE <= 74] = "70"
+acs2017_ny$AGE[acs2017_ny$AGE >= 75 & acs2017_ny$AGE <= 79] = "75"
+acs2017_ny$AGE[acs2017_ny$AGE >= 80] = "80"
+
+acs2017_ny$AGE = factor(acs2017_ny$AGE,levels=c("18","25","30","35","40","45","50","55","60","65","70","75","80"))
+
 
 #Ownership 
 
@@ -90,20 +121,20 @@ levels(acs2017_ny$in_NYC) <- c("No","Yes")
 
 
 #Recoding for BRFSS
-```{r}
+```{r, echo=FALSE}
 #INCOME
 is.na(BRFSS_USE$INCOME2) <- which(BRFSS_USE$INCOME2 == 99)
 is.na(BRFSS_USE$INCOME2) <- which(BRFSS_USE$INCOME2 == 77)
 na.exclude(BRFSS_USE$INCOME2)
 BRFSS_USE$INCOME2 <- as.factor(BRFSS_USE$INCOME2)
-levels(BRFSS_USE$INCOME2) <- c("0", "10000", "15000","20000","25000","35000","50000","75000", "230000")
+levels(BRFSS_USE$INCOME2) <- c("0", "10000", "15000","20000","25000","35000","50000","75000","2030000")
 
 #Age Variable 
 
 is.na(BRFSS_USE$X_AGEG5YR) <- which(BRFSS_USE$X_AGEG5YR == 14)
 na.exclude(BRFSS_USE$X_AGEG5YR)
-BRFSS_USE$X_AGEG5YR <- as.factor(BRFSS_USE$X_AGEG5YR)
-levels(BRFSS_USE$X_AGEG5YR) <- c("18","25","30","35","40","45","50","55","60","65","70","75","80","100")
+BRFSS_USE$AGE <- as.factor(BRFSS_USE$X_AGEG5YR)
+levels(BRFSS_USE$AGE) <- c("18","25","30","35","40","45","50","55","60","65","70","75","80")
 
 #Gender 
 
@@ -180,6 +211,16 @@ BRFSS_USE$EDUCA <- fct_collapse(BRFSS_USE$EDUCA, College = c("College 4 years or
 
 ```
 
+
+```{r}
+#library(mice)
+#init = mice(BRFSS_USE, maxit = 0) 
+#meth = init$method
+#predM = init$predictorMatrix
+```
+
+
+
 #Random forest for the likeability of a person in NYS being in NYC
 
 ```{r}
@@ -191,7 +232,7 @@ restrict_1 <- (runif(NN1) < 0.20) # use 10% as training data
 summary(restrict_1)
 dat_train1 <- subset(acs2017_ny, restrict_1)
 dat_test1 <- subset(acs2017_ny, !restrict_1)
-sobj1 <- standardize(in_NYC ~  INCOME2 + RENTHOM1 + RACE + X_HISPANC + EDUCA + LABFORCE + HLTHPLN1 + X_AGEG5YR + MARST + SEXVAR, dat_train1, family = binomial, na.action = na.pass)
+sobj1 <- standardize(in_NYC ~  INCOME2 + RENTHOM1 + RACE + X_HISPANC + EDUCA + LABFORCE + HLTHPLN1 + AGE + MARST + SEXVAR, dat_train1, family = binomial, na.action = na.pass)
 
 s_dat_test1 <- predict(sobj1, dat_test1)
 ```
@@ -221,7 +262,7 @@ BRFSS.SUBSET <- subset(BRFSS_USE,BRFSS.SUBSET.RULE)
 
 
 ```{r}
-s_dat_test2 <- predict(sobj1, newdata = BRFSS.SUBSET,type="class")
+s_dat_test2 <- predict(sobj1, newdata = BRFSS.SUBSET)
 BRFSS.SUBSET$in_NYC <- predict(model_rf1, newdata = s_dat_test2,)
 summary(BRFSS.SUBSET$in_NYC)
 ```
@@ -242,7 +283,7 @@ restrict_2 <- as.logical(round(runif(NN,min=0,max=0.75))) # use fraction as trai
 summary(restrict_2)
 dat_train2 <- subset(acs2017_ny, restrict_2)
 dat_test2 <- subset(acs2017_ny, !restrict_2)
-sobj2 <- standardize(borough ~ INCOME2 + RENTHOM1 + RACE + X_HISPANC + EDUCA + LABFORCE  + HLTHPLN1 + X_AGEG5YR + MARST, dat_train2, family = binomial)
+sobj2 <- standardize(borough ~ INCOME2 + RENTHOM1 + RACE + X_HISPANC + EDUCA + LABFORCE  + HLTHPLN1 + AGE + MARST, dat_train2, family = binomial)
 
 s_dat_test3 <- predict(sobj2, dat_test2)
 ```
@@ -273,6 +314,84 @@ s_dat_test3 <- predict(sobj2, BRFSS.SUBSET2)
 BRFSS.SUBSET2$borough <- predict(model_rf2, s_dat_test3, na.action=na.exclude)
 summary(BRFSS.SUBSET2$borough)
 ```
+Recoding for the fruit variables 
+
+#Fruits daily 
+```{r}
+#NAs 
+is.na(BRFSS.SUBSET2$FRUIT2) <- which(BRFSS.SUBSET2$FRUIT2 == 777)
+is.na(BRFSS.SUBSET2$FRUIT2) <- which(BRFSS.SUBSET2$FRUIT2 == 999)
+#Creates Dummy
+BRFSS.SUBSET2$Daily.fruit <- ifelse((BRFSS.SUBSET2$FRUIT2 >= 101) & (BRFSS.SUBSET2$FRUIT2 <= 199), 1, 0)
+
+BRFSS.SUBSET2$Daily.fruit  <- as.factor(BRFSS.SUBSET2$Daily.fruit)
+levels(BRFSS.SUBSET2$Daily.fruit) <- c("Yes", "No")
+
+```
+
+#Veggies daily 
+```{r}
+#NAs 
+is.na(BRFSS.SUBSET2$FVGREEN1) <- which(BRFSS.SUBSET2$FVGREEN1== 777)
+is.na(BRFSS.SUBSET2$FVGREEN1) <- which(BRFSS.SUBSET2$FVGREEN1 == 999)
+#Creates Dummy
+BRFSS.SUBSET2$Daily.greens <- ifelse((BRFSS.SUBSET2$FVGREEN1 >= 101) & (BRFSS.SUBSET2$FVGREEN1 <= 199), 1, 0)
+
+BRFSS.SUBSET2$Daily.greens  <- as.factor(BRFSS.SUBSET2$Daily.greens)
+levels(BRFSS.SUBSET2$Daily.greens) <- c("Yes", "No")
+```
+
+
+```{r}
+Model.Logit <- glm(Daily.fruit ~ borough,
+            family = binomial, data = BRFSS.SUBSET2)
+
+summary(Model.Logit)
+```
+
+```{r}
+Model.Logit2 <- glm(Daily.greens ~ borough,
+            family = binomial, data = BRFSS.SUBSET2)
+
+summary(Model.Logit2)
+require("effects")
+plot(allEffects(Model.Logit4))
+```
+
+```{r}
+BRFSS.SUBSET2$Healthy.ppl <- ifelse((BRFSS.SUBSET2$Daily.fruit == "Yes") | (BRFSS.SUBSET2$Daily.greens == "Yes"), 1, 0)
+```
+
+```{r}
+Model.Logit3 <- glm(Healthy.ppl ~ borough,
+            family = binomial, data = BRFSS.SUBSET2)
+
+summary(Model.Logit3)
+
+```
+
+```{r}
+BRFSS.SUBSET2$Healthy.ppl  <- as.factor(BRFSS.SUBSET2$Healthy.ppl)
+levels(BRFSS.SUBSET2$Healthy.ppl) <- c("Yes", "No")
+
+Model.Logit4 <- glm(Healthy.ppl ~ INCOME2,
+            family = binomial, data = BRFSS.SUBSET2)
+
+summary(Model.Logit4)
+require("effects")
+plot(allEffects(Model.Logit4))
+```
+
+```{r}
+Model.Logit4 <- glm(Healthy.ppl ~ borough,
+            family = binomial, data = BRFSS.SUBSET2)
+
+summary(Model.Logit4)
+require("effects")
+plot(allEffects(Model.Logit4))
+
+```
+
 
 
 
